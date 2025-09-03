@@ -1,6 +1,7 @@
 from robot import *
 from convert_tools import *
 import time
+from env import robot_config
 
 
 def waitRobot(robot):
@@ -9,12 +10,15 @@ def waitRobot(robot):
         time.sleep(0.1)
         ec = {}
         st = robot.operationState(ec)
-        if st == rokae.OperationState.idle.value or st == rokae.OperationState.unknown.value:
+        if (
+            st == rokae.OperationState.idle.value
+            or st == rokae.OperationState.unknown.value
+        ):
             running = False
 
 
 def main():
-    ip = "192.168.0.160"
+    ip = robot_config.remoteIP
     ec = {}
 
     with XMateErProRobot(ip) as robot:
@@ -35,7 +39,14 @@ def main():
         ################################################ 2. 查询信息 #########################################################
         # 获取机器人的基本信息
         info = robot.robotInfo(ec)
-        print("机器人轴数:", info["joint_num"], "机型:", info["type"], "控制器版本:", info["version"])
+        print(
+            "机器人轴数:",
+            info["joint_num"],
+            "机型:",
+            info["type"],
+            "控制器版本:",
+            info["version"],
+        )
         # 获取SDK版本
         print("SDK版本:", robot.sdkVersion(ec))
         # 获取机器人的上下电状态
@@ -157,58 +168,109 @@ def main():
 
         # ############################################### 10. Move L 点位测试/ NB4 运动指令 ########################################################
         p1 = MoveLCommand(
-            [0.6319677128120011, -8.34603520129436e-05, 0.5079049014875741, 3.1415841917280183, -0.0005208332350316503, -3.1415883987024773],
-            500, 0)
+            [
+                0.6319677128120011,
+                -8.34603520129436e-05,
+                0.5079049014875741,
+                3.1415841917280183,
+                -0.0005208332350316503,
+                -3.1415883987024773,
+            ],
+            500,
+            0,
+        )
         # p1.offset = [0.1, 0, 0, 0, 0, 0]
 
         p2 = MoveLCommand(
-            [0.6319677128120011, -8.34603520129436e-05 + 0.2, 0.5079049014875741, 3.1415841917280183, -0.0005208332350316503, -3.1415883987024773],
-            400, 0)
+            [
+                0.6319677128120011,
+                -8.34603520129436e-05 + 0.2,
+                0.5079049014875741,
+                3.1415841917280183,
+                -0.0005208332350316503,
+                -3.1415883987024773,
+            ],
+            400,
+            0,
+        )
         # p2.offset = [0, 0, 0.01, 0, 0, 0]
 
         p3 = MoveLCommand(
-            [0.6319677128120011, -8.34603520129436e-05 + 0.2, 0.5079049014875741 - 0.2, 3.1415841917280183, -0.0005208332350316503, -3.1415883987024773],
-            300, 0)
+            [
+                0.6319677128120011,
+                -8.34603520129436e-05 + 0.2,
+                0.5079049014875741 - 0.2,
+                3.1415841917280183,
+                -0.0005208332350316503,
+                -3.1415883987024773,
+            ],
+            300,
+            0,
+        )
 
         p4 = MoveLCommand(
-            [0.6319677128120011, -8.34603520129436e-05 + 0.2, 0.5079049014875741, 3.1415841917280183, -0.0005208332350316503, -3.1415883987024773],
-            100, 300)
+            [
+                0.6319677128120011,
+                -8.34603520129436e-05 + 0.2,
+                0.5079049014875741,
+                3.1415841917280183,
+                -0.0005208332350316503,
+                -3.1415883987024773,
+            ],
+            100,
+            300,
+        )
         # p1.offset = [0.1, 0, 0, 0, 0, 0]
 
         p5 = MoveLCommand(
-            [0.6319677128120011, -8.34603520129436e-05, 0.5079049014875741, 3.1415841917280183, -0.0005208332350316503, -3.1415883987024773],
-            100, 300)
+            [
+                0.6319677128120011,
+                -8.34603520129436e-05,
+                0.5079049014875741,
+                3.1415841917280183,
+                -0.0005208332350316503,
+                -3.1415883987024773,
+            ],
+            100,
+            300,
+        )
 
         while True:
-            cmd = input("please input"
-                        " 'm(start move)', 'p(pause)', 'c(continue)', 'q(break)', 'i(check)', 's(stop)','a(adjust)',"
-                        "'r(reset)', d(drag), k(stop_drag) ")
-            if cmd == 'm':
+            cmd = input(
+                "please input"
+                " 'm(start move)', 'p(pause)', 'c(continue)', 'q(break)', 'i(check)', 's(stop)','a(adjust)',"
+                "'r(reset)', d(drag), k(stop_drag) "
+            )
+            if cmd == "m":
                 print("start move")
                 robot.executeCommand([p1, p2, p3, p4, p5], ec)
                 robot.moveStart(ec)
                 print(ec)
-            elif cmd == 'p':
+            elif cmd == "p":
                 print("suspend")
                 robot.pause(ec)
-            elif cmd == 'd':
+            elif cmd == "d":
                 print("drag")
                 robot.setOperateMode(rokae.OperateMode.manual, ec)
-                robot.enableDrag(rokae.DragParameter.Space.jointSpace.value, rokae.DragParameter.Type.freely.value, ec)
-            elif cmd == 'k':
+                robot.enableDrag(
+                    rokae.DragParameter.Space.jointSpace.value,
+                    rokae.DragParameter.Type.freely.value,
+                    ec,
+                )
+            elif cmd == "k":
                 print("kill drag")
                 robot.disableDrag(ec)
-            elif cmd == 'c':
+            elif cmd == "c":
                 print("continue move")
                 robot.moveStart(ec)
-            elif cmd == 'a':
+            elif cmd == "a":
                 print("adjust speed percentage 0.5")
                 robot.adjustSpeedOnline(0.1, ec)
-            elif cmd == 'i':
+            elif cmd == "i":
                 print("current pos id:", robot.getPointPos(ec))
-            elif cmd == 'r':
+            elif cmd == "r":
                 robot.moveReset(ec)
-            elif cmd == 's':
+            elif cmd == "s":
                 robot.stop(ec)
             else:
                 print("stop")
@@ -220,5 +282,5 @@ def main():
 
 
 #
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
